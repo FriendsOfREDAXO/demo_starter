@@ -1,82 +1,158 @@
 # Starter-Demo für REDAXO
 
-Eine zweisprachige Beispiel-Website, die **nur mit dem auskommt, was REDAXO mitbringt** – plus YForm und YRewrite.
-Sie ist zugleich ein **Lehrstück**: Jede Seite erklärt ein Stück REDAXO und ist selbst damit gebaut. Unten auf jeder
-Seite steht, welches Template und welche Module sie verwendet.
+**Lehrstück und Startpunkt: eine zweisprachige Beispiel-Website – nur mit dem, was REDAXO mitbringt, plus YForm und YRewrite.**
 
-- Struktur, Templates (mit Teil-Templates), neun kommentierte Module, Medienpool, Media Manager, Metainfos
-- Deutsch und Englisch, sprechende Adressen mit YRewrite
-- YForm-Tabellen mit **YOrm**-Modellen: Termine als Liste, Kontaktformular aus der Tabellendefinition
-- Frontend mit [nativecss](https://github.com/skerbis/nativecss) – natives CSS ohne Framework und Build-Schritt,
-  **hell und dunkel** (Systemeinstellung oder Schalter)
+![Starter-Demo für REDAXO](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/hero.png)
+
+Jede Seite der Demo erklärt ein Stück REDAXO – und ist selbst damit gebaut. Unten auf jeder Seite steht, welches
+Template und welche Module sie verwendet. Wer das Backend daneben öffnet, sieht sofort, wie es gemacht ist.
+
+Und sie veraltet nicht: Statt fester AddOn-Versionen und eines Datenbank-Dumps beschreibt ein lesbares **Rezept**, was es
+geben soll. Angelegt wird alles über die Schnittstellen von REDAXO, die passenden AddOn-Versionen sucht die Demo selbst.
+
+## Auf einen Blick
+
+- **Nur Bordmittel** – Struktur, Templates, Module, Medienpool, Media Manager, Metainfos, PHPMailer – plus **YForm** und **YRewrite**
+- **Zweisprachig** Deutsch / Englisch mit sprechenden Adressen (`/de/grundlagen/module/`, `/en/basics/modules/`)
+- **Neun kommentierte Module** und drei Templates, jedes zeigt eine Technik
+- **YForm mit YOrm**: Termine als Datenliste, Kontaktformular direkt aus der Tabellendefinition – ohne Pipe-Notation
+- **Hell und dunkel** – folgt dem System oder dem Schalter in der Kopfzeile
+- **Natives CSS** mit [nativecss](https://github.com/skerbis/nativecss): kein Framework, kein Build-Schritt, fließende Typografie
+- **Ohne Versionsrecherche**: fehlende AddOns holt die Demo über den Installer – mit Versionsbedingung statt fester Version
+- **Update-sicher**: erneutes Einrichten ergänzt, was fehlt, und überschreibt nie, was Sie geändert haben
+
+---
+
+## Die Website
+
+| Hell | Dunkel, englisch |
+|---|---|
+| ![Startseite](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/home.png) | ![Startseite dunkel](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/home-dark-en.png) |
+
+Die **Karten** füllen sich selbst aus der Struktur: neue Seite in der Kategorie anlegen – schon erscheint sie. Bild und
+Kurztext kommen aus den Metadaten der Seite.
+
+![Karten aus der Struktur](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/cards.png)
+
+Sechs Seiten erklären die **Grundlagen**: Struktur & Artikel, Templates, Module, Medien & Media Manager, Sprachen &
+Adressen, Daten & Formulare. Jede mit einem Kasten „Im Backend ansehen“.
+
+| Module – mit Bildergalerie | Daten & Formulare – Termine per YOrm |
+|---|---|
+| ![Module](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/module.png) | ![Termine](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/yform-events.png) |
+
+Das **Kontaktformular** entsteht aus der YForm-Tabelle „Kontaktanfragen“ – Felder, Beschriftungen und Prüfungen stehen in
+der Tabelle, nicht im Modul. Unten auf jeder Seite: **So ist diese Seite gebaut**.
+
+| Kontaktformular | Handy |
+|---|---|
+| ![Kontakt](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/contact.png) | ![Handy](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/mobile.png) |
+
+![So ist diese Seite gebaut](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/built-with.png)
+
+## Im Backend
+
+Unter **AddOns → Starter-Demo**: **Einrichten** zeigt die benötigten AddOns mit Versionsbedingung und installiertem
+Stand, richtet die Demo ein und protokolliert jeden Schritt. Der **Rundgang** verlinkt jede Stelle, die die Website erklärt.
+
+| Einrichten | Rundgang |
+|---|---|
+| ![Einrichten](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/backend-setup.png) | ![Rundgang](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/backend-tour.png) |
+
+---
 
 ## Installation
 
-1. AddOn installieren (Installer oder Ordner nach `redaxo/src/addons/demo_starter` kopieren)
-2. **Starter-Demo → Einrichten → Demo einrichten** – oder auf der Konsole:
+1. AddOn installieren – über den Installer oder als Ordner `redaxo/src/addons/demo_starter`
+2. **Starter-Demo → Einrichten → Demo einrichten**, oder auf der Konsole:
    ```
    php bin/console demo_starter:install
    ```
 
-Mehr ist nicht nötig. Fehlende AddOns holt die Demo selbst.
+Das ist alles. Medienpool, Media Manager, Metainfo und PHPMailer werden aktiviert, YForm und YRewrite in der neuesten
+passenden Version aus dem Installer geholt – auch in einer frischen REDAXO-Installation.
+
+Voraussetzungen: REDAXO ab 5.17, PHP ab 8.1, Apache (für YRewrite wird die `.htaccess` kopiert) oder eine entsprechende
+Konfiguration für nginx.
 
 ## Warum diese Demo nicht veraltet
 
-Bisherige Demos merken sich **feste Versionen** der AddOns (eine bestimmte Datei im Installer) und spielen einen
-**SQL-Dump** ein. Beides bricht, sobald AddOns sich weiterentwickeln. Diese Demo macht es anders:
-
-| | bisher | Starter-Demo |
+| | bisherige Demos | Starter-Demo |
 |---|---|---|
-| AddOns | feste Version („yform 4.1.1“) | **Bedingung** (`^5.0`) – die neueste passende stabile Version, notfalls die nächstältere |
-| Inhalte | Datenbank-Dump überschreibt die Installation | **Rezept** (`data/recipe.yml`), angelegt über die Schnittstellen von REDAXO |
-| Templates, Module | im Dump | als **Dateien** (`data/templates`, `data/modules`), mit Kommentaren |
-| Wiederholen | überschreibt alles | **gefahrlos**: ergänzt Fehlendes, überschreibt nie eigene Änderungen |
-| Frontend | Bootstrap 3 / UIkit | natives CSS, keine Framework-Version, die veraltet |
-
-**Update-sicher:** Templates und Module werden beim erneuten Einrichten nur ersetzt, wenn sie seit dem letzten Mal
-unverändert sind (Prüfsumme). Seiteninhalte schreibt die Demo nur beim ersten Anlegen – danach gehören sie der Redaktion.
+| AddOns | feste Datei im Installer („yform 4.1.1“) | **Bedingung** (`^5.0`) – neueste passende stabile Version, notfalls die nächstältere |
+| Inhalte | Datenbank-Dump überschreibt die Installation | **Rezept** (`data/recipe.yml`) über `rex_category_service`, `rex_content_service`, `rex_media_service`, YForm-API … |
+| Templates, Module | stecken im Dump | **Dateien** mit Kommentaren (`data/templates`, `data/modules`) |
+| Wiederholen | überschreibt alles | ergänzt Fehlendes, eigene Änderungen bleiben |
+| Frontend | Bootstrap 3 / UIkit | natives CSS – keine Framework-Version, die veraltet |
 
 ## Aktualisieren
 
-**YForm, YRewrite, REDAXO selbst** werden wie gewohnt über den Installer aktualisiert. Die Demo gibt nur Bedingungen
-vor (`^5.0`), jede passende Version ist recht. Für eine neue Hauptversion wird die Bedingung im Rezept angepasst.
+**YForm, YRewrite und REDAXO selbst** werden wie gewohnt über den Installer aktualisiert. Die Demo gibt nur Bedingungen
+vor; für eine neue Hauptversion wird die Bedingung im Rezept angepasst.
 
-**Die Demo selbst:** Nach einem Update des AddOns (Installer) weist das Backend Admins darauf hin, dass die Inhalte
-noch von der vorigen Version stammen. Ein Klick auf **Demo ergänzen / aktualisieren** – oder
-`php bin/console demo_starter:install` – erledigt den Rest:
+**Die Demo selbst:** Nach einem Update des AddOns weist das Backend Admins darauf hin, dass die Inhalte noch von der
+vorigen Version stammen. **Demo ergänzen / aktualisieren** (oder `demo_starter:install`) erledigt den Rest:
 
 | Baustein | beim Aktualisieren |
 |---|---|
-| Templates, Module | neue Fassung, wenn seit dem letzten Einrichten unverändert (Prüfsumme) – sonst bleibt Ihre Fassung |
+| Templates, Module | neue Fassung, wenn seit dem letzten Einrichten unverändert (Prüfsumme) – sonst bleibt Ihre |
 | neue Seiten, Medien, Medientypen, Metainfo-Felder, YForm-Tabellen | werden ergänzt |
-| YForm-Felder in bestehenden Tabellen | fehlende werden ergänzt, vorhandene bleiben, wie sie sind |
-| Medientypen, Metainfo-Felder, die vom Rezept abweichen | bleiben, das Protokoll nennt sie |
+| YForm-Felder bestehender Tabellen | fehlende werden ergänzt, vorhandene bleiben |
+| abweichende Medientypen, Metainfo-Felder | bleiben – das Protokoll nennt sie |
 | Seiteninhalte | werden nie angefasst |
 
-**Abweichungen:** Unter *Einrichten* listet die Demo Templates und Module, die nicht ihrer Fassung entsprechen –
-„ausstehend“ (übernimmt das nächste Aktualisieren) oder „von Hand geändert“. Ein Klick zeigt die Unterschiede Zeile für
-Zeile; **Neue Fassung übernehmen** ersetzt eine eigene Änderung ausdrücklich (mit Rückfrage).
+Unter **Einrichten → Abweichungen** stehen Templates und Module, die nicht der Fassung der Demo entsprechen – mit
+Zeilen-Vergleich und **Neue Fassung übernehmen** (mit Rückfrage).
 
-## Aufbau
+![Abweichungen](https://raw.githubusercontent.com/FriendsOfREDAXO/demo_starter/assets/screenshots/backend-differences.png)
+
+## Das Lehrstück: was wo steckt
+
+| Thema | Datei | zeigt |
+|---|---|---|
+| Template-Gerüst | `data/templates/layout.php` | `REX_ARTICLE[]`, `REX_TEMPLATE[key=…]`, SEO-Tags von YRewrite, Seitentitel aus dem Artikel |
+| Navigation | `data/templates/navigation.php` | `rex_category::getRootCategories()`, Metainfo „Im Hauptmenü zeigen“, Sprachwechsler mit `rex_clang`, Theme-Schalter |
+| Fußbereich | `data/templates/footer.php` | Service-Links aus einer Kategorie, „So ist diese Seite gebaut“ aus `rex_article_slice` |
+| Text | `data/modules/text/` | `REX_VALUE`, sichere Ausgabe, Markdown mit `rex_markdown` aus dem Core |
+| Bühne | `data/modules/hero/` | `REX_MEDIA`, `REX_LINK`, Media Manager |
+| Text mit Bild | `data/modules/text_image/` | `rex_media` – Titel als Alternativtext, Bildmaße gegen Springen |
+| Karten | `data/modules/cards/` | `rex_category_select`, Struktur-API, Metainfo-Felder |
+| Bildergalerie | `data/modules/gallery/` | `REX_MEDIALIST`, natives `<dialog>` als Lightbox |
+| Video | `data/modules/video/` | Video aus dem Medienpool mit `<video>` |
+| Termine | `data/modules/events/`, `lib/Model/Event.php` | YOrm: Modellklasse, `query()->where()->orderBy()`, Zweisprachigkeit im Modell |
+| Kontaktformular | `data/modules/contact/`, `lib/Model/Message.php` | YOrm-Formular aus der Tabelle, `executeForm()`, E-Mail mit `rex_mailer` |
+| Hinweis | `data/modules/notice/` | Aussehen über ein Auswahlfeld steuern |
+| Hell/Dunkel | `assets/theme.js`, `assets/site.css` | `light-dark()`, `[data-theme]`, kein Aufblitzen |
+| Rezept | `data/recipe.yml` | alles, was die Demo anlegt – lesbar |
+| Installer | `lib/Installer.php`, `lib/Packages.php` | REDAXO-Services, YForm-Tabellen-API, Versionsauflösung über den Installer |
+
+## Eigene Demo oder eigener Projekt-Starter
+
+Das Rezept ist absichtlich lesbar. `data/recipe.yml`, Templates, Module und Medien anpassen – der Installer bleibt
+derselbe. So entsteht ein Starter für eigene Projekte, der sich genauso sicher erneut ausführen lässt.
 
 ```
-data/recipe.yml          Was die Demo anlegt: AddOns, Sprachen, Metainfos, Medientypen, Medien,
-                         YForm-Tabellen, Templates, Module, Seiten mit Inhalten (de/en)
-data/templates/*.php     Templates (Layout, Navigation, Fußbereich)
-data/modules/<key>/      Module: module.yml, input.php, output.php
+data/recipe.yml          AddOns (Bedingungen), Sprachen, Metainfos, Medientypen, Medien, YForm-Tabellen,
+                         Templates, Module, Seiten mit Inhalten je Sprache
+data/templates/*.php     Templates
+data/modules/<key>/      module.yml, input.php, output.php
 data/media/              Bilder und Video, Nachweise in CREDITS.md
-lib/Packages.php         Holt AddOns über den Installer – Versionsbedingung statt fester Version
-lib/Installer.php        Setzt das Rezept um (rex_category_service, rex_content_service, rex_media_service, YForm-API …)
-lib/Model/               YOrm-Modelle: Event, Message
-assets/                  site.css (Gestaltung), theme.js (hell/dunkel), ncss/ (nativecss)
+lib/                     Installer, Packages (Versionsauflösung), Diff, YOrm-Modelle, Konsolenbefehl
+assets/                  site.css, theme.js, ncss/ (nativecss)
 docs/tour.*.md           Rundgang im Backend
 ```
 
-## Eigene Demo bauen
+## Bildnachweise
 
-Das Rezept ist absichtlich lesbar. Für eine eigene Demo oder einen Projekt-Starter: `data/recipe.yml`, Templates,
-Module und Medien anpassen – der Installer bleibt derselbe.
+Sechs Landschaften sind für die Demo erzeugt (CC0, siehe `data/media/generator.html`). Bokeh, Glaswürfel und das Intro-Video
+stammen aus [demo_uikit3](https://github.com/FriendsOfREDAXO/demo_uikit3). Details: [data/media/CREDITS.md](data/media/CREDITS.md).
 
 ## Lizenz
 
-MIT. nativecss: MIT (© Thomas Skerbis, KLXM Crossmedia). Bildnachweise: `data/media/CREDITS.md`.
+MIT – siehe [LICENSE.md](LICENSE.md). Enthält [nativecss](https://github.com/skerbis/nativecss) (MIT).
+
+## Autor
+
+**Friends Of REDAXO** – https://github.com/FriendsOfREDAXO
+
+**Projektleitung:** [Thomas Skerbis](https://github.com/skerbis)

@@ -36,6 +36,27 @@ Bisherige Demos merken sich **feste Versionen** der AddOns (eine bestimmte Datei
 **Update-sicher:** Templates und Module werden beim erneuten Einrichten nur ersetzt, wenn sie seit dem letzten Mal
 unverändert sind (Prüfsumme). Seiteninhalte schreibt die Demo nur beim ersten Anlegen – danach gehören sie der Redaktion.
 
+## Aktualisieren
+
+**YForm, YRewrite, REDAXO selbst** werden wie gewohnt über den Installer aktualisiert. Die Demo gibt nur Bedingungen
+vor (`^5.0`), jede passende Version ist recht. Für eine neue Hauptversion wird die Bedingung im Rezept angepasst.
+
+**Die Demo selbst:** Nach einem Update des AddOns (Installer) weist das Backend Admins darauf hin, dass die Inhalte
+noch von der vorigen Version stammen. Ein Klick auf **Demo ergänzen / aktualisieren** – oder
+`php bin/console demo_starter:install` – erledigt den Rest:
+
+| Baustein | beim Aktualisieren |
+|---|---|
+| Templates, Module | neue Fassung, wenn seit dem letzten Einrichten unverändert (Prüfsumme) – sonst bleibt Ihre Fassung |
+| neue Seiten, Medien, Medientypen, Metainfo-Felder, YForm-Tabellen | werden ergänzt |
+| YForm-Felder in bestehenden Tabellen | fehlende werden ergänzt, vorhandene bleiben, wie sie sind |
+| Medientypen, Metainfo-Felder, die vom Rezept abweichen | bleiben, das Protokoll nennt sie |
+| Seiteninhalte | werden nie angefasst |
+
+**Abweichungen:** Unter *Einrichten* listet die Demo Templates und Module, die nicht ihrer Fassung entsprechen –
+„ausstehend“ (übernimmt das nächste Aktualisieren) oder „von Hand geändert“. Ein Klick zeigt die Unterschiede Zeile für
+Zeile; **Neue Fassung übernehmen** ersetzt eine eigene Änderung ausdrücklich (mit Rückfrage).
+
 ## Aufbau
 
 ```

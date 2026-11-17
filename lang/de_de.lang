@@ -47,3 +47,15 @@ demo_starter_form_err_name = Bitte geben Sie Ihren Namen ein.
 demo_starter_form_err_email = Bitte geben Sie eine gültige E-Mail-Adresse ein.
 demo_starter_form_err_message = Bitte schreiben Sie eine Nachricht.
 demo_starter_form_err_privacy = Bitte stimmen Sie der Speicherung zu.
+
+demo_starter_update_pending = Die Demo wurde in Version {1} eingerichtet, installiert ist jetzt {0}. Mit „Demo ergänzen / aktualisieren“ kommen neue Seiten, Felder, Templates und Module dazu – Ihre eigenen Änderungen bleiben erhalten.
+demo_starter_update_notice = Starter-Demo {0} ist installiert – die Inhalte stammen noch von {1}. <a href="{2}">Jetzt aktualisieren</a>
+demo_starter_diff_title = Abweichungen
+demo_starter_diff_intro = Diese Templates und Module entsprechen nicht der Fassung der Demo. „Ausstehend“ übernimmt das nächste Aktualisieren von selbst. „Von Hand geändert“ bleibt stehen – außer Sie übernehmen die neue Fassung ausdrücklich.
+demo_starter_diff_none = Templates und Module entsprechen der Fassung der Demo.
+demo_starter_diff_edited = von Hand geändert
+demo_starter_diff_pending = ausstehend
+demo_starter_diff_legend = Rot: aktueller Stand in REDAXO · Grün: Fassung der Demo
+demo_starter_adopt = Neue Fassung übernehmen
+demo_starter_adopt_confirm = Ihre Änderungen an diesem Baustein werden überschrieben. Fortfahren?
+demo_starter_adopted = Die neue Fassung von „{0}“ wurde übernommen.

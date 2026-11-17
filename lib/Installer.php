@@ -103,6 +103,8 @@ final class Installer
         $this->structure();
         $this->yrewriteStartPages();
         $this->saveRegistry();
+        // Mit welcher Version zuletzt eingerichtet? Weicht die installierte ab, zeigt das Backend einen Hinweis (boot.php).
+        rex_config::set('demo_starter', 'applied_version', rex_addon::get('demo_starter')->getVersion());
         rex_delete_cache();
         $this->log[] = ['ok', 'Cache gelöscht – fertig.'];
     }
@@ -151,8 +153,11 @@ final class Installer
         require_once rex_path::addon('metainfo', 'functions/function_metainfo.php');
         $types = array_column(rex_sql::factory()->getArray('SELECT id, label FROM ' . rex::getTable('metainfo_type')), 'id', 'label');
         foreach ((array) ($this->recipe['metainfo'] ?? []) as $field) {
-            $exists = rex_sql::factory()->getArray('SELECT id FROM ' . rex::getTable('metainfo_field') . ' WHERE name = ?', [$field['name']]);
+            $exists = rex_sql::factory()->getArray('SELECT id, type_id FROM ' . rex::getTable('metainfo_field') . ' WHERE name = ?', [$field['name']]);
             if ([] !== $exists) {
+                if ((int) $exists[0]['type_id'] !== (int) $types[$field['type']]) {
+                    $this->log[] = ['skip', 'Metainfo-Feld ' . $field['name'] . ': anderer Feldtyp als im Rezept – bleibt, wie es ist'];
+                }
                 continue;
             }
             $result = rex_metainfo_add_field($field['title'], $field['name'], (int) ($field['priority'] ?? 1), '', (int) $types[$field['type']], (string) ($field['default'] ?? ''), (string) ($field['params'] ?? ''));
@@ -172,6 +177,9 @@ final class Installer
         foreach ((array) ($this->recipe['media_types'] ?? []) as $name => $type) {
             $exists = rex_sql::factory()->getArray('SELECT id FROM ' . rex::getTable('media_manager_type') . ' WHERE name = ?', [$name]);
             if ([] !== $exists) {
+                if ($this->mediaTypeEffects((int) $exists[0]['id']) !== array_map(static fn (array $e): string => (string) $e['effect'], (array) $type['effects'])) {
+                    $this->log[] = ['skip', 'Media-Manager-Typ ' . $name . ': Effekte weichen vom Rezept ab – bleibt, wie er ist'];
+                }
                 continue;
             }
             $sql = rex_sql::factory()->setTable(rex::getTable('media_manager_type'));
@@ -193,6 +201,15 @@ final class Installer
             }
             $this->log[] = ['ok', 'Media-Manager-Typ angelegt: ' . $name];
         }
+    }
+
+    /** @return list<string> Effekte eines Medientyps in Reihenfolge */
+    private function mediaTypeEffects(int $typeId): array
+    {
+        return array_map('strval', array_column(rex_sql::factory()->getArray(
+            'SELECT effect FROM ' . rex::getTable('media_manager_type_effect') . ' WHERE type_id = ? ORDER BY priority',
+            [$typeId],
+        ), 'effect'));
     }
 
     // ------------------------------------------------------------------------------------------------------------
@@ -249,6 +266,19 @@ final class Installer
                     'search' => 1,
                 ], $fields);
                 $this->log[] = ['ok', 'YForm-Tabelle angelegt: ' . $tableName];
+            } else {
+                // Bestehende Tabelle: nur FEHLENDE Felder ergänzen – vorhandene (vielleicht angepasste) bleiben, wie sie sind
+                $table = rex_yform_manager_table::get($tableName);
+                foreach ((array) $definition['fields'] as $prio => $field) {
+                    $identifier = ['type_id' => $field['type_id'], 'name' => $field['name']];
+                    if ('validate' === $field['type_id']) {
+                        $identifier['type_name'] = $field['type_name'];
+                    }
+                    if ([] === $table->getFields($identifier)) {
+                        rex_yform_manager_table_api::setTableField($tableName, $field + ['prio' => $prio + 1, 'list_hidden' => 0, 'search' => 1]);
+                        $this->log[] = ['ok', 'YForm-Feld ergänzt: ' . $tableName . '.' . $field['name'] . ('validate' === $field['type_id'] ? ' (Prüfung ' . $field['type_name'] . ')' : '')];
+                    }
+                }
             }
             // Spalten in der Datenbank zu den Feldern anlegen (idempotent – fehlende werden ergänzt)
             rex_yform_manager_table::deleteCache();
@@ -561,6 +591,66 @@ final class Installer
         );
         rex_yrewrite::generateConfig();
         rex_yrewrite::deleteCache();
+    }
+
+    // ------------------------------------------------------------------------------------------------------------
+    // Abweichungen: Templates und Module, deren Inhalt in der Datenbank nicht der Datei entspricht
+    // ------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @return list<array{kind: string, key: string, name: string, edited: bool, current: string, file: string}>
+     *         edited = von Hand geändert (sonst übernimmt „Demo aktualisieren“ die neue Fassung ohnehin)
+     */
+    public function differences(): array
+    {
+        $list = [];
+        foreach ((array) ($this->recipe['templates'] ?? []) as $key => $definition) {
+            $row = rex_sql::factory()->getArray('SELECT content FROM ' . rex::getTable('template') . ' WHERE `key` = ?', [$key]);
+            $file = $this->templateFile((string) $key);
+            if ([] !== $row && (string) $row[0]['content'] !== $file) {
+                $current = (string) $row[0]['content'];
+                $list[] = ['kind' => 'templates', 'key' => (string) $key, 'name' => (string) $definition['name'], 'edited' => ($this->registry['templates'][$key] ?? null) !== md5($current), 'current' => $current, 'file' => $file];
+            }
+        }
+        foreach ((array) ($this->recipe['modules'] ?? []) as $key) {
+            $row = rex_sql::factory()->getArray('SELECT name, input, output FROM ' . rex::getTable('module') . ' WHERE `key` = ?', [$key]);
+            [$input, $output] = $this->moduleFiles((string) $key);
+            if ([] !== $row && $row[0]['input'] . $row[0]['output'] !== $input . $output) {
+                $current = "/* Eingabe */\n" . $row[0]['input'] . "\n/* Ausgabe */\n" . $row[0]['output'];
+                $list[] = ['kind' => 'modules', 'key' => (string) $key, 'name' => (string) $row[0]['name'], 'edited' => ($this->registry['modules'][$key] ?? null) !== md5($row[0]['input'] . $row[0]['output']), 'current' => $current, 'file' => "/* Eingabe */\n" . $input . "\n/* Ausgabe */\n" . $output];
+            }
+        }
+        return $list;
+    }
+
+    /** Neue Fassung aus der Datei übernehmen – überschreibt bewusst die eigene Änderung */
+    public function adopt(string $kind, string $key): void
+    {
+        if ('templates' === $kind && isset($this->recipe['templates'][$key])) {
+            $content = $this->templateFile($key);
+            rex_sql::factory()->setTable(rex::getTable('template'))->setWhere(['key' => $key])->setValue('content', $content)->addGlobalUpdateFields()->update();
+            $this->registry['templates'][$key] = md5($content);
+        } elseif ('modules' === $kind && in_array($key, (array) ($this->recipe['modules'] ?? []), true)) {
+            [$input, $output] = $this->moduleFiles($key);
+            rex_sql::factory()->setTable(rex::getTable('module'))->setWhere(['key' => $key])->setValue('input', $input)->setValue('output', $output)->addGlobalUpdateFields()->update();
+            $this->registry['modules'][$key] = md5($input . $output);
+        } else {
+            throw new RuntimeException('Unbekannt: ' . $kind . ' ' . $key);
+        }
+        $this->saveRegistry();
+        rex_delete_cache();
+    }
+
+    private function templateFile(string $key): string
+    {
+        return (string) rex_file::get(rex_path::addon('demo_starter', 'data/templates/' . $key . '.php'));
+    }
+
+    /** @return array{0: string, 1: string} Eingabe, Ausgabe */
+    private function moduleFiles(string $key): array
+    {
+        $dir = rex_path::addon('demo_starter', 'data/modules/' . $key . '/');
+        return [(string) rex_file::get($dir . 'input.php'), (string) rex_file::get($dir . 'output.php')];
     }
 
     private function saveRegistry(): void

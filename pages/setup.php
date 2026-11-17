@@ -7,6 +7,7 @@
  * Lektion: Aktionen nur per POST mit CSRF-Token (rex_csrf_token) – nie über einen einfachen Link.
  */
 
+use FriendsOfRedaxo\DemoStarter\Diff;
 use FriendsOfRedaxo\DemoStarter\Installer;
 
 $addon = rex_addon::get('demo_starter');
@@ -14,6 +15,17 @@ $csrf = rex_csrf_token::factory('demo_starter_setup');
 $step = rex_request('step', 'string', '');
 $log = [];
 $message = '';
+
+// Neue Fassung eines von Hand geänderten Templates/Moduls übernehmen
+if ('adopt' === $step && $csrf->isValid()) {
+    try {
+        (new Installer())->adopt(rex_post('kind', 'string', ''), rex_post('key', 'string', ''));
+        $message = rex_view::success(rex_i18n::msg('demo_starter_adopted', rex_post('key', 'string', '')));
+    } catch (Throwable $e) {
+        $message = rex_view::error(rex_escape($e->getMessage()));
+    }
+    $step = '';
+}
 
 if ('' !== $step && !$csrf->isValid()) {
     $message = rex_view::error(rex_i18n::msg('csrf_token_invalid'));
@@ -52,6 +64,10 @@ foreach ((array) $recipe['packages'] as $key => $constraint) {
     $rows .= '<tr><td><code>' . rex_escape($key) . '</code></td><td><code>' . rex_escape((string) $constraint) . '</code></td><td>' . $state . '</td></tr>';
 }
 $installed = [] !== (array) (rex_config::get('demo_starter', 'registry', [])['pages'] ?? []);
+$applied = (string) rex_config::get('demo_starter', 'applied_version', '');
+if ($installed && $applied !== $addon->getVersion()) {
+    echo rex_view::warning(rex_i18n::msg('demo_starter_update_pending', $addon->getVersion(), '' !== $applied ? $applied : '?'));
+}
 
 $body = '<p>' . rex_i18n::msg('demo_starter_setup_intro') . '</p>'
     . '<p class="text-muted">' . rex_i18n::msg('demo_starter_setup_safe') . '</p>'
@@ -70,6 +86,27 @@ $fragment->setVar('title', rex_i18n::msg('demo_starter_page_setup'), false);
 $fragment->setVar('body', $body, false);
 echo $fragment->parse('core/page/section.php');
 
+// Abweichungen: Templates und Module, die nicht (mehr) der Fassung der Demo entsprechen
+if ($installed) {
+    $differences = (new Installer())->differences();
+    $rows = '';
+    foreach ($differences as $d) {
+        $adopt = '<form method="post" action="' . rex_url::currentBackendPage() . '" style="display:inline">' . $csrf->getHiddenField()
+            . '<input type="hidden" name="step" value="adopt"><input type="hidden" name="kind" value="' . rex_escape($d['kind']) . '"><input type="hidden" name="key" value="' . rex_escape($d['key']) . '">'
+            . '<button type="submit" class="btn btn-xs btn-default"' . ($d['edited'] ? ' data-confirm="' . rex_escape(rex_i18n::msg('demo_starter_adopt_confirm')) . '"' : '') . '>'
+            . rex_i18n::msg('demo_starter_adopt') . '</button></form>';
+        $rows .= '<details class="demo-diff-item"><summary><strong>' . rex_escape($d['name']) . '</strong> <code>' . rex_escape($d['key']) . '</code> '
+            . ($d['edited'] ? '<span class="label label-warning">' . rex_i18n::msg('demo_starter_diff_edited') . '</span>' : '<span class="label label-info">' . rex_i18n::msg('demo_starter_diff_pending') . '</span>')
+            . ' ' . $adopt . '</summary>'
+            . '<p class="help-block">' . rex_i18n::msg('demo_starter_diff_legend') . '</p>'
+            . Diff::html($d['current'], $d['file']) . '</details>';
+    }
+    $fragment = new rex_fragment();
+    $fragment->setVar('title', rex_i18n::msg('demo_starter_diff_title') . ' (' . count($differences) . ')', false);
+    $fragment->setVar('body', '' !== $rows ? '<p>' . rex_i18n::msg('demo_starter_diff_intro') . '</p>' . $rows : '<p class="text-muted">' . rex_i18n::msg('demo_starter_diff_none') . '</p>', false);
+    echo $fragment->parse('core/page/section.php');
+}
+
 if ([] !== $log) {
     $items = '';
     foreach ($log as [$level, $text]) {
@@ -82,6 +119,16 @@ if ([] !== $log) {
     echo $fragment->parse('core/page/section.php');
 }
 ?>
+<style nonce="<?= rex_response::getNonce() ?>">
+.demo-diff { max-height: 28rem; overflow: auto; font-size: 12px; line-height: 1.45; }
+.demo-diff span { display: block; white-space: pre; }
+.demo-diff-add { background: rgba(46, 160, 67, .15); }
+.demo-diff-del { background: rgba(248, 81, 73, .15); }
+.demo-diff-same { color: #6a737d; }
+.demo-diff-gap { color: #6a737d; text-align: center; }
+.demo-diff-item { padding: 8px 0; border-bottom: 1px solid rgba(0, 0, 0, .08); }
+.demo-diff-item summary { cursor: pointer; }
+</style>
 <script nonce="<?= rex_response::getNonce() ?>">
 document.querySelectorAll('form[data-auto-submit]').forEach(function (form) { form.submit(); });
 </script>

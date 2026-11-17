@@ -47,3 +47,15 @@ demo_starter_form_err_name = Please enter your name.
 demo_starter_form_err_email = Please enter a valid email address.
 demo_starter_form_err_message = Please write a message.
 demo_starter_form_err_privacy = Please agree to the storage of your details.
+
+demo_starter_update_pending = The demo was set up with version {1}, version {0} is now installed. “Complete / update demo” adds new pages, fields, templates and modules – your own changes are kept.
+demo_starter_update_notice = Starter demo {0} is installed – the content is still from {1}. <a href="{2}">Update now</a>
+demo_starter_diff_title = Differences
+demo_starter_diff_intro = These templates and modules differ from the demo's version. “Pending” is taken over by the next update automatically. “Edited by hand” is kept – unless you explicitly adopt the new version.
+demo_starter_diff_none = Templates and modules match the demo's version.
+demo_starter_diff_edited = edited by hand
+demo_starter_diff_pending = pending
+demo_starter_diff_legend = Red: current state in REDAXO · Green: demo version
+demo_starter_adopt = Adopt new version
+demo_starter_adopt_confirm = Your changes to this building block will be overwritten. Continue?
+demo_starter_adopted = The new version of “{0}” has been adopted.

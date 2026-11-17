@@ -1,0 +1,216 @@
+# Rezept der Demo – alles, was „Demo einrichten“ anlegt.
+#
+# Warum ein Rezept statt eines Datenbank-Dumps?
+#  - Ein Dump friert die Tabellen eines bestimmten AddOn-Stands ein und überschreibt beim Einspielen die ganze Installation.
+#  - Das Rezept beschreibt nur, WAS es geben soll. Angelegt wird es über die Schnittstellen von REDAXO
+#    (rex_category_service, rex_content_service, rex_media_service, YForm-Tabellen-API …) – die bleiben über Updates stabil.
+#  - Erneut ausführen ist gefahrlos: Was es schon gibt, bleibt; was Sie geändert haben, wird nicht überschrieben.
+
+# AddOns jenseits des Cores – nur Bedingungen, keine festen Versionen. Genommen wird die neueste passende stabile Version.
+packages:
+    mediapool: '*'          # gehört zu REDAXO – wird nur installiert/aktiviert, falls nötig
+    media_manager: '*'
+    metainfo: '*'
+    phpmailer: '*'
+    yform: '^5.0'           # kommt aus dem Installer: neueste stabile 5.x
+    yrewrite: '^2.10'
+
+# Sprachen: die erste ist die Hauptsprache (gibt es schon), weitere werden angelegt
+languages:
+    - { code: de, name: Deutsch }
+    - { code: en, name: English }
+
+# Zusätzliche Felder für Seiten und Kategorien (Metainfo-AddOn)
+metainfo:
+    - { name: art_teaser, title: 'translate:demo_starter_meta_teaser', type: textarea, priority: 1 }
+    - { name: art_image, title: 'translate:demo_starter_meta_image', type: REX_MEDIA_WIDGET, priority: 2 }
+    - { name: cat_menu, title: 'translate:demo_starter_meta_menu', type: checkbox, params: '1:translate:demo_starter_meta_menu_yes', default: '1', priority: 1 }
+
+# Bildgrößen für den Media Manager: Name => Effekte
+media_types:
+    demo_hero:
+        description: 'Demo: Bühne, Großansicht (max. 1920 px, WebP)'
+        effects:
+            - { effect: resize, params: { width: 1920, height: 1920, style: maximum, allow_enlarge: not_enlarge } }
+            - { effect: image_format, params: { convert_to: webp } }
+    demo_split:
+        description: 'Demo: Bild neben Text (1200 px breit)'
+        effects:
+            - { effect: resize, params: { width: 1200, height: 1200, style: maximum, allow_enlarge: not_enlarge } }
+            - { effect: image_format, params: { convert_to: webp } }
+    demo_card:
+        description: 'Demo: Karte (800 × 500, zugeschnitten)'
+        effects:
+            - { effect: resize, params: { width: 800, height: 500, style: minimum, allow_enlarge: enlarge } }
+            - { effect: crop, params: { width: 800, height: 500, hpos: center, vpos: middle } }
+            - { effect: image_format, params: { convert_to: webp } }
+    demo_thumb:
+        description: 'Demo: Vorschaubild (400 × 400, zugeschnitten)'
+        effects:
+            - { effect: crop, params: { width: 400, height: 400, hpos: center, vpos: middle } }
+            - { effect: image_format, params: { convert_to: webp } }
+
+# Medien: Datei aus data/media => Titel (dient als Alternativtext)
+media:
+    category: Demo
+    files:
+        landscape-dawn.jpg: 'Morgendämmerung über blauen Hügeln'
+        landscape-forest.jpg: 'Grüne Hügel im Sonnenlicht'
+        landscape-dusk.jpg: 'Abendstimmung mit untergehender Sonne'
+        landscape-sea.jpg: 'Ruhige Küstenlandschaft'
+        landscape-desert.jpg: 'Warme Wüstenhügel'
+        landscape-night.jpg: 'Hügel bei Nacht mit hellem Mond'
+        bokeh-blue.jpg: 'Blaue Lichtpunkte, unscharf'
+        glass-cube.jpg: 'Gläserner Würfel auf blauem Grund'
+        friendsofredaxo-intro.mp4: 'Intro der Friends Of REDAXO'
+
+# YForm-Tabellen – Felder und Prüfungen; YOrm-Modelle dazu in lib/Model
+yform_tables:
+    rex_demo_event:
+        name: 'translate:demo_starter_table_events'
+        list_sortfield: date
+        fields:
+            - { type_id: value, type_name: text, name: title, label: 'Titel (deutsch)' }
+            - { type_id: value, type_name: text, name: title_en, label: 'Titel (englisch)' }
+            - { type_id: value, type_name: date, name: date, label: Datum, format: Y-m-d }
+            - { type_id: value, type_name: text, name: place, label: Ort }
+            - { type_id: value, type_name: textarea, name: text, label: 'Text (deutsch)', list_hidden: 1 }
+            - { type_id: value, type_name: textarea, name: text_en, label: 'Text (englisch)', list_hidden: 1 }
+            - { type_id: value, type_name: checkbox, name: status, label: 'Online', default: '1' }
+            - { type_id: validate, type_name: empty, name: title, message: 'Bitte einen Titel eingeben.' }
+            - { type_id: validate, type_name: empty, name: date, message: 'Bitte ein Datum wählen.' }
+        data:
+            - { title: 'REDAXO-Stammtisch', title_en: 'REDAXO meetup', date: '+14 days', place: 'Online', text: 'Lockerer Austausch über Projekte, AddOns und Fragen – Einsteiger willkommen.', text_en: 'Casual chat about projects, add-ons and questions – beginners welcome.', status: 1 }
+            - { title: 'Workshop: Module schreiben', title_en: 'Workshop: writing modules', date: '+35 days', place: 'Köln', text: 'Vom ersten REX_VALUE bis zum Modul mit Medienpool und Linkmap.', text_en: 'From the first REX_VALUE to a module with media pool and link map.', status: 1 }
+            - { title: 'YForm in der Praxis', title_en: 'YForm in practice', date: '+60 days', place: 'Online', text: 'Tabellen, YOrm und Formulare – live gebaut.', text_en: 'Tables, YOrm and forms – built live.', status: 1 }
+    rex_demo_message:
+        name: 'translate:demo_starter_table_messages'
+        list_sortfield: createdate
+        list_sortorder: DESC
+        fields:
+            - { type_id: value, type_name: text, name: name, label: 'translate:demo_starter_form_name', attributes: '{"autocomplete":"name"}' }
+            - { type_id: value, type_name: email, name: email, label: 'translate:demo_starter_form_email', attributes: '{"autocomplete":"email"}' }
+            - { type_id: value, type_name: textarea, name: message, label: 'translate:demo_starter_form_message', list_hidden: 1 }
+            - { type_id: value, type_name: checkbox, name: privacy, label: 'translate:demo_starter_form_privacy', list_hidden: 1 }
+            - { type_id: value, type_name: datestamp, name: createdate, label: 'translate:demo_starter_form_date', only_empty: 1, show_value: 1 }
+            - { type_id: validate, type_name: empty, name: name, message: 'translate:demo_starter_form_err_name' }
+            - { type_id: validate, type_name: type, name: email, type: email, message: 'translate:demo_starter_form_err_email' }
+            - { type_id: validate, type_name: empty, name: email, message: 'translate:demo_starter_form_err_email' }
+            - { type_id: validate, type_name: empty, name: message, message: 'translate:demo_starter_form_err_message' }
+            - { type_id: validate, type_name: empty, name: privacy, message: 'translate:demo_starter_form_err_privacy' }
+
+# Templates: Schlüssel => Name, Datei data/templates/<schlüssel>.php; aktiv = für Artikel wählbar
+templates:
+    layout: { name: 'Layout', active: true }
+    navigation: { name: 'Teil: Navigation', active: false }
+    footer: { name: 'Teil: Fußbereich', active: false }
+
+# Module: Schlüssel => Ordner data/modules/<schlüssel>/ (module.yml, input.php, output.php)
+modules: [hero, text, text_image, cards, gallery, video, events, contact, notice]
+
+# Seiten. „id“ ist ein fester Name im Rezept (damit erneutes Ausführen dieselbe Seite wiederfindet).
+# Pro Sprache: name, teaser und slices (Modul + Werte). value1 … value20, media1, medialist1, link1 wie im Modul.
+structure:
+    - id: home
+      start: true
+      de:
+          name: Startseite
+          slices:
+              - { module: hero, value1: 'Willkommen bei REDAXO', value2: 'Diese Demo zeigt die Grundlagen: Struktur, Templates, Module, Medien, Sprachen – plus YForm und YRewrite. Alles hier ist bearbeitbar.', value3: 'Grundlagen entdecken', media1: landscape-dawn.jpg, link1: '@basics' }
+              - { module: text, value1: 'Ein Lehrstück zum Anfassen', value2: "Jede Seite dieser Demo erklärt ein Stück REDAXO – und ist selbst damit gebaut. Ganz unten steht bei jeder Seite, welches **Template** und welche **Module** sie verwendet.\n\nMelden Sie sich im Backend an und schauen Sie sich an, wie es gemacht ist: Struktur, Module, Templates, Medienpool. Ändern Sie etwas – nichts kann kaputtgehen, und „Demo einrichten“ stellt Fehlendes wieder her." }
+              - { module: cards, value1: '@basics', value2: 'Die Grundlagen' }
+              - { module: text_image, value1: 'Ohne Framework, mit Hell und Dunkel', value2: "Das Frontend nutzt **nativecss**: modernes, natives CSS ohne Build-Schritt. Typografie und Abstände passen sich fließend an, Hell und Dunkel folgen dem System – oder dem Schalter oben rechts.\n\nDie Demo kommt mit dem Kern von REDAXO aus, dazu YForm für Formulare und Daten und YRewrite für sprechende Adressen.", media1: glass-cube.jpg, value3: right }
+      en:
+          name: Home
+          slices:
+              - { module: hero, value1: 'Welcome to REDAXO', value2: 'This demo shows the basics: structure, templates, modules, media, languages – plus YForm and YRewrite. Everything here can be edited.', value3: 'Explore the basics', media1: landscape-dawn.jpg, link1: '@basics' }
+              - { module: text, value1: 'A hands-on lesson', value2: "Every page of this demo explains a piece of REDAXO – and is built with it. At the bottom of each page you see which **template** and which **modules** it uses.\n\nLog in to the backend and look at how it is made: structure, modules, templates, media pool. Change things – nothing can break, and “Set up demo” restores what is missing." }
+              - { module: cards, value1: '@basics', value2: 'The basics' }
+              - { module: text_image, value1: 'No framework, light and dark', value2: "The frontend uses **nativecss**: modern, native CSS without a build step. Typography and spacing scale fluidly, light and dark follow your system – or the switch at the top right.\n\nThe demo only needs the REDAXO core, plus YForm for forms and data and YRewrite for readable URLs.", media1: glass-cube.jpg, value3: right }
+
+    - id: basics
+      category: true
+      de: { name: Grundlagen, teaser: 'Wie eine REDAXO-Website aufgebaut ist – Schritt für Schritt.', slices: [ { module: text, value2: 'REDAXO trennt **Inhalt** (Struktur, Artikel, Slices), **Aussehen** (Templates) und **Bausteine** (Module). Die folgenden Seiten erklären jeweils einen Teil – mit Hinweisen, wo Sie ihn im Backend finden.' }, { module: cards, value1: '@basics' } ] }
+      en: { name: Basics, teaser: 'How a REDAXO website is built – step by step.', slices: [ { module: text, value2: 'REDAXO separates **content** (structure, articles, slices), **look** (templates) and **building blocks** (modules). The following pages each explain one part – with hints where to find it in the backend.' }, { module: cards, value1: '@basics' } ] }
+      children:
+          - id: structure
+            category: true
+            de: { name: 'Struktur & Artikel', teaser: 'Kategorien, Artikel und Slices – das Gerüst jeder Seite.', image: landscape-forest.jpg, slices: [
+                { module: text_image, value1: 'Kategorien und Artikel', value2: "Die **Struktur** ist der Seitenbaum: Kategorien enthalten Artikel und weitere Kategorien. Jede Kategorie hat einen Startartikel – das ist die Seite, die man beim Klick auf die Kategorie sieht.\n\nEin Artikel besteht aus **Slices**: Blöcken, die je ein Modul nutzen. Diese Seite hat zwei – einen „Text mit Bild“ und einen „Hinweis“.", media1: landscape-forest.jpg },
+                { module: notice, value3: backend, value1: 'Im Backend ansehen', value2: "**Struktur → Grundlagen → Struktur & Artikel** öffnen. Unter „Inhalt“ sehen Sie die Slices dieser Seite, unter „Metadaten“ Kurztext und Teaserbild für die Karten." } ] }
+            en: { name: 'Structure & articles', teaser: 'Categories, articles and slices – the frame of every page.', image: landscape-forest.jpg, slices: [
+                { module: text_image, value1: 'Categories and articles', value2: "The **structure** is the page tree: categories contain articles and further categories. Every category has a start article – the page you see when you click the category.\n\nAn article is made of **slices**: blocks that each use a module. This page has two – a “text with image” and a “notice”.", media1: landscape-forest.jpg },
+                { module: notice, value3: backend, value1: 'See it in the backend', value2: "Open **Structure → Basics → Structure & articles**. “Content” shows the slices of this page, “Metadata” holds the short text and teaser image used by the cards." } ] }
+          - id: templates
+            category: true
+            de: { name: Templates, teaser: 'Das Gerüst um den Inhalt: Kopf, Navigation, Fuß.', image: landscape-sea.jpg, slices: [
+                { module: text, value1: 'Ein Template, zwei Teile', value2: "Ein **Template** ist PHP und HTML, das um den Inhalt herum liegt. Diese Demo hat ein Template „Layout“ und zwei Teile: Navigation und Fußbereich. Das Layout bindet sie mit `REX_TEMPLATE[key=navigation]` ein.\n\n`REX_ARTICLE[]` gibt die Slices des aktuellen Artikels aus. Die Navigation entsteht aus der Struktur: `rex_category::getRootCategories(true)` – mit dem Metainfo-Feld „Im Hauptmenü zeigen“ steuert die Redaktion, was erscheint." },
+                { module: notice, value3: backend, value1: 'Im Backend ansehen', value2: "**Templates → Layout**: Gerüst der Seite. **Teil: Navigation** und **Teil: Fußbereich** sind inaktiv – sie werden nur eingebunden, nicht Artikeln zugewiesen." } ] }
+            en: { name: Templates, teaser: 'The frame around the content: head, navigation, footer.', image: landscape-sea.jpg, slices: [
+                { module: text, value1: 'One template, two parts', value2: "A **template** is PHP and HTML wrapped around the content. This demo has a template “Layout” and two parts: navigation and footer. The layout includes them with `REX_TEMPLATE[key=navigation]`.\n\n`REX_ARTICLE[]` outputs the slices of the current article. The navigation is built from the structure: `rex_category::getRootCategories(true)` – the metainfo field “Show in main menu” lets editors decide what appears." },
+                { module: notice, value3: backend, value1: 'See it in the backend', value2: "**Templates → Layout**: the frame of the page. **Part: navigation** and **part: footer** are inactive – they are only included, not assigned to articles." } ] }
+          - id: modules
+            category: true
+            de: { name: Module, teaser: 'Bausteine für Inhalte – Eingabe und Ausgabe.', image: landscape-desert.jpg, slices: [
+                { module: text, value1: 'Eingabe und Ausgabe', value2: "Ein **Modul** hat zwei Teile: die **Eingabe** (das Formular im Backend) und die **Ausgabe** (HTML auf der Website). Felder heißen `REX_INPUT_VALUE[1]` in der Eingabe und `REX_VALUE[1]` in der Ausgabe. Dazu kommen `REX_MEDIA`, `REX_MEDIALIST` und `REX_LINK` für Medien und Links.\n\nDiese Demo hat neun Module – von „Text“ bis „Kontaktformular“. Jedes ist im Code kommentiert." },
+                { module: gallery, value1: 'Beispiel: Modul „Bildergalerie“', medialist1: 'landscape-dawn.jpg,landscape-forest.jpg,landscape-dusk.jpg,landscape-sea.jpg,landscape-desert.jpg,landscape-night.jpg' },
+                { module: notice, value3: tip, value1: 'Tipp', value2: 'Im Backend unter **Module** die Ausgabe eines Moduls ändern – die Seite zeigt es sofort. Mit „Demo einrichten“ holen Sie das Original zurück, wenn Sie das Modul vorher unverändert gelassen haben.' } ] }
+            en: { name: Modules, teaser: 'Building blocks for content – input and output.', image: landscape-desert.jpg, slices: [
+                { module: text, value1: 'Input and output', value2: "A **module** has two parts: the **input** (the form in the backend) and the **output** (HTML on the website). Fields are called `REX_INPUT_VALUE[1]` in the input and `REX_VALUE[1]` in the output. Add `REX_MEDIA`, `REX_MEDIALIST` and `REX_LINK` for media and links.\n\nThis demo has nine modules – from “Text” to “Contact form”. Each one is commented in the code." },
+                { module: gallery, value1: 'Example: module “Image gallery”', medialist1: 'landscape-dawn.jpg,landscape-forest.jpg,landscape-dusk.jpg,landscape-sea.jpg,landscape-desert.jpg,landscape-night.jpg' },
+                { module: notice, value3: tip, value1: 'Tip', value2: 'Change the output of a module under **Modules** in the backend – the page shows it right away.' } ] }
+          - id: media
+            category: true
+            de: { name: 'Medien & Media Manager', teaser: 'Bilder einmal hochladen, in jeder Größe ausgeben.', image: bokeh-blue.jpg, slices: [
+                { module: text_image, value1: 'Ein Bild, viele Größen', value2: "Bilder und Dateien liegen im **Medienpool**. Der **Media Manager** liefert sie in passenden Größen aus: Ein Medientyp beschreibt, was mit dem Bild passiert – verkleinern, zuschneiden, in WebP umwandeln.\n\nDiese Demo legt vier Typen an: `demo_hero`, `demo_split`, `demo_card`, `demo_thumb`. Der Titel eines Bildes im Medienpool dient als Alternativtext.", media1: bokeh-blue.jpg, value3: right },
+                { module: video, value1: 'Auch Videos kommen aus dem Medienpool: das Intro der Friends Of REDAXO.', media1: friendsofredaxo-intro.mp4, media2: glass-cube.jpg },
+                { module: notice, value3: backend, value1: 'Im Backend ansehen', value2: "**Medienpool → Demo** zeigt die Bilder. **Media Manager** zeigt die Typen und ihre Effekte." } ] }
+            en: { name: 'Media & media manager', teaser: 'Upload an image once, output it in any size.', image: bokeh-blue.jpg, slices: [
+                { module: text_image, value1: 'One image, many sizes', value2: "Images and files live in the **media pool**. The **media manager** delivers them in suitable sizes: a media type describes what happens to the image – resize, crop, convert to WebP.\n\nThis demo creates four types: `demo_hero`, `demo_split`, `demo_card`, `demo_thumb`. The title of an image in the media pool serves as alt text.", media1: bokeh-blue.jpg, value3: right },
+                { module: video, value1: 'Videos come from the media pool, too: the Friends Of REDAXO intro.', media1: friendsofredaxo-intro.mp4, media2: glass-cube.jpg },
+                { module: notice, value3: backend, value1: 'See it in the backend', value2: "**Media pool → Demo** shows the images. **Media manager** shows the types and their effects." } ] }
+          - id: languages
+            category: true
+            de: { name: 'Sprachen & Adressen', teaser: 'Zwei Sprachen und sprechende URLs mit YRewrite.', image: landscape-night.jpg, slices: [
+                { module: text, value1: 'Jede Seite in jeder Sprache', value2: "REDAXO legt jede Seite in **jeder Sprache** an – Deutsch und Englisch teilen sich die Struktur, Inhalte werden pro Sprache gepflegt. Der Sprachwechsler oben nutzt `rex_clang::getAll(true)` und `rex_getUrl(Artikel, Sprache)`.\n\n**YRewrite** macht daraus sprechende Adressen wie `/de/grundlagen/sprachen-adressen/` und bringt SEO-Felder pro Seite mit (Titel, Beschreibung, Bild)." },
+                { module: notice, value3: backend, value1: 'Im Backend ansehen', value2: "**System → Sprachen** zeigt die Sprachen. **YRewrite → Domains** die Domain dieser Installation, im Artikel unter „SEO“ Titel und Beschreibung." } ] }
+            en: { name: 'Languages & URLs', teaser: 'Two languages and readable URLs with YRewrite.', image: landscape-night.jpg, slices: [
+                { module: text, value1: 'Every page in every language', value2: "REDAXO creates every page in **every language** – German and English share the structure, content is maintained per language. The language switch at the top uses `rex_clang::getAll(true)` and `rex_getUrl(article, language)`.\n\n**YRewrite** turns this into readable URLs like `/en/basics/languages-urls/` and adds SEO fields per page (title, description, image)." },
+                { module: notice, value3: backend, value1: 'See it in the backend', value2: "**System → Languages** lists the languages. **YRewrite → Domains** shows this installation's domain; in an article, “SEO” holds title and description." } ] }
+          - id: yform
+            category: true
+            de: { name: 'Daten & Formulare', teaser: 'Eigene Tabellen und Formulare mit YForm und YOrm.', image: landscape-dusk.jpg, slices: [
+                { module: text, value1: 'Tabellen statt Artikel', value2: "Nicht alles ist eine Seite. **Termine** zum Beispiel sind Datensätze: Die Demo legt mit YForm eine Tabelle an, die Redaktion pflegt sie unter **YForm → Tabellen**.\n\nAusgegeben werden sie mit **YOrm** – ohne SQL: `Event::upcoming()` liefert die nächsten Termine als Objekte (siehe `lib/Model/Event.php`)." },
+                { module: events, value1: 'Nächste Termine', value2: 6 },
+                { module: notice, value3: tip, value1: 'Das Formular', value2: 'Das Kontaktformular entsteht aus der Tabelle „Kontaktanfragen“: `Message::create()->getForm()`. Felder und Prüfungen stehen in der Tabelle, nicht im Modul.' } ] }
+            en: { name: 'Data & forms', teaser: 'Your own tables and forms with YForm and YOrm.', image: landscape-dusk.jpg, slices: [
+                { module: text, value1: 'Tables instead of articles', value2: "Not everything is a page. **Events**, for example, are records: the demo creates a table with YForm, editors maintain it under **YForm → Tables**.\n\nThey are output with **YOrm** – no SQL: `Event::upcoming()` returns the next events as objects (see `lib/Model/Event.php`)." },
+                { module: events, value1: 'Upcoming events', value2: 6 },
+                { module: notice, value3: tip, value1: 'The form', value2: 'The contact form is built from the table “Contact requests”: `Message::create()->getForm()`. Fields and validation live in the table, not in the module.' } ] }
+
+    - id: contact
+      category: true
+      de: { name: Kontakt, teaser: 'Schreiben Sie uns – das Formular ist ein YForm-Formular aus einer Tabelle.', slices: [
+          { module: text, value2: 'Fragen zur Demo oder zu REDAXO? Die Nachricht wird in der Tabelle „Kontaktanfragen“ gespeichert und – wenn ein Empfänger eingetragen ist – per E-Mail weitergeleitet.' },
+          { module: contact, value2: 'Danke! Ihre Nachricht ist angekommen.' } ] }
+      en: { name: Contact, teaser: 'Write to us – this is a YForm form built from a table.', slices: [
+          { module: text, value2: 'Questions about the demo or REDAXO? The message is stored in the table “Contact requests” and – if a recipient is set – forwarded by email.' },
+          { module: contact, value2: 'Thank you! Your message has arrived.' } ] }
+
+    - id: service
+      category: true
+      menu: false
+      setting: service_category
+      de: { name: Service, slices: [ { module: text, value2: 'Rechtliche Angaben und Hilfen.' } ] }
+      en: { name: Service, slices: [ { module: text, value2: 'Legal information and help.' } ] }
+      articles:
+          - id: imprint
+            de: { name: Impressum, slices: [ { module: text, value2: "**Beispiel-Impressum**\n\nDiese Seite ist Teil der REDAXO-Demo. Ersetzen Sie den Text durch Ihre eigenen Angaben." } ] }
+            en: { name: Imprint, slices: [ { module: text, value2: "**Sample imprint**\n\nThis page is part of the REDAXO demo. Replace the text with your own details." } ] }
+          - id: privacy
+            de: { name: Datenschutz, slices: [ { module: text, value2: "**Beispiel-Datenschutzerklärung**\n\nDie Demo setzt keine Cookies und bindet keine fremden Dienste ein. Das Kontaktformular speichert Name, E-Mail und Nachricht in der Datenbank. Ersetzen Sie diesen Text durch Ihre eigene Erklärung." } ] }
+            en: { name: Privacy, slices: [ { module: text, value2: "**Sample privacy policy**\n\nThe demo sets no cookies and embeds no third-party services. The contact form stores name, email and message in the database. Replace this text with your own policy." } ] }
+          - id: notfound
+            setting: notfound_article
+            de: { name: 'Seite nicht gefunden', slices: [ { module: text, value2: 'Diese Seite gibt es nicht (mehr). Zurück zur [Startseite](/).' } ] }
+            en: { name: 'Page not found', slices: [ { module: text, value2: 'This page does not exist (anymore). Back to the [home page](/).' } ] }

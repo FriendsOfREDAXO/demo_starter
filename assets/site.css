@@ -1,0 +1,114 @@
+/*
+ * Starter-Demo – Gestaltung der Website auf Basis von nativecss.
+ *
+ * Lektion: Alle Farben kommen aus den Tokens von nativecss (--ncss-color-…). Sie sind mit light-dark() definiert –
+ * deshalb funktioniert jede Regel hier im hellen UND im dunklen Farbschema, ohne eigenes Dark-Stylesheet.
+ * Eigene Werte (Markenfarbe) werden einmal in :root gesetzt.
+ */
+/* Eigene Werte außerhalb der nativecss-Layer – ungelayerte Regeln gewinnen immer */
+:root {
+    --ncss-color-brand: light-dark(#4b6fd1, #8aa6f2);
+    --site-accent: light-dark(#d9483b, #ff8a73);
+    --site-max: 72rem;
+}
+
+body { min-height: 100dvh; display: flex; flex-direction: column; }
+.site-main { flex: 1; padding-block-end: var(--ncss-space-2xl); }
+.ncss-container { max-width: var(--site-max); margin-inline: auto; padding-inline: var(--ncss-space-md); }
+
+/* Kopf */
+.site-brand { display: inline-flex; align-items: center; gap: .5em; font-weight: var(--ncss-font-weight-bold); text-decoration: none; color: inherit; }
+.site-logo { display: grid; place-items: center; width: 1.9em; height: 1.9em; border-radius: .55em; background: var(--ncss-color-brand); color: var(--ncss-color-brand-contrast); font-weight: 800; }
+.site-lang { display: flex; gap: .25rem; }
+.site-lang a { padding: .3em .55em; border-radius: var(--ncss-radius-md); font-size: var(--ncss-font-size-sm); font-weight: var(--ncss-font-weight-semibold); text-decoration: none; color: var(--ncss-color-text-muted); }
+.site-lang a[aria-current] { background: var(--ncss-color-bg-subtle); color: var(--ncss-color-text); }
+.site-theme-toggle { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border: 1px solid var(--ncss-color-border); border-radius: var(--ncss-radius-full); background: var(--ncss-color-surface); color: var(--ncss-color-text); cursor: pointer; }
+.site-theme-toggle svg { width: 1.15rem; height: 1.15rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: none; }
+.site-theme-toggle[data-mode="system"] .i-system, .site-theme-toggle[data-mode="light"] .i-light, .site-theme-toggle[data-mode="dark"] .i-dark { display: block; }
+.ncss-topbar-actions { display: flex; align-items: center; gap: var(--ncss-space-sm); }
+
+/* Seitenkopf ohne Bühne */
+.site-pagehead { padding-block: var(--ncss-space-2xl) 0; }
+.site-pagehead + .site-section { margin-top: var(--ncss-space-lg); }
+.site-pagehead h1 { font-size: clamp(2.2rem, 1.6rem + 2.4vw, 3.6rem); letter-spacing: -.02em; }
+.site-lead { max-width: 46rem; margin-top: var(--ncss-space-sm); font-size: var(--ncss-font-size-lg); color: var(--ncss-color-text-muted); }
+
+/* Abschnitte */
+.site-section { margin-block: var(--ncss-space-xl); }
+.site-section h2 { letter-spacing: -.01em; }
+
+/* Bühne */
+.site-hero { min-height: min(78vh, 46rem); }
+.site-hero h1 { font-size: clamp(2.4rem, 1.6rem + 3.6vw, 4.6rem); letter-spacing: -.025em; max-width: 18ch; }
+.site-hero-text { max-width: 40rem; font-size: var(--ncss-font-size-lg); }
+.site-btn { background: var(--site-accent); color: #fff; border-color: transparent; }
+
+/* Bilder */
+.site-img { width: 100%; height: auto; border-radius: var(--ncss-radius-lg); }
+
+/* Karten */
+.site-card { position: relative; overflow: hidden; }
+.site-card .ncss-card-media { width: 100%; height: auto; aspect-ratio: 8 / 5; object-fit: cover; }
+.site-card-link { color: inherit; text-decoration: none; }
+.site-card-link::after { content: ""; position: absolute; inset: 0; }   /* ganze Karte klickbar */
+.site-card:focus-within { outline: 3px solid var(--ncss-color-focus-ring); outline-offset: 2px; }
+
+/* Hinweis-Kasten */
+.site-notice { padding: var(--ncss-space-md) var(--ncss-space-lg); border-radius: var(--ncss-radius-lg); border-inline-start: 5px solid var(--ncss-color-brand); background: var(--ncss-color-bg-subtle); }
+.site-notice--tip { border-color: var(--ncss-color-success); }
+.site-notice--backend { border-color: var(--site-accent); }
+.site-notice-title { font-weight: var(--ncss-font-weight-bold); margin-bottom: .35em; }
+.site-notice > :last-child { margin-bottom: 0; }
+
+/* Galerie mit nativem <dialog> */
+.site-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: var(--ncss-space-sm); padding: 0; list-style: none; }
+.site-gallery-item { display: block; padding: 0; border: 0; border-radius: var(--ncss-radius-md); overflow: hidden; cursor: zoom-in; background: none; }
+.site-gallery-item img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; transition: transform .3s ease; }
+.site-gallery-item:hover img { transform: scale(1.04); }
+.site-lightbox img { display: block; max-width: min(90vw, 1400px); max-height: 80vh; width: auto; height: auto; margin-inline: auto; }
+
+/* Video */
+.site-video video { width: 100%; border-radius: var(--ncss-radius-lg); background: #000; }
+
+/* Termine */
+.site-events { display: grid; gap: var(--ncss-space-md); padding: 0; list-style: none; }
+.site-event { display: flex; gap: var(--ncss-space-md); padding: var(--ncss-space-md); border: 1px solid var(--ncss-color-border); border-radius: var(--ncss-radius-lg); background: var(--ncss-color-surface); }
+.site-event-date { display: grid; place-content: center; flex: none; width: 4.5rem; height: 4.5rem; border-radius: var(--ncss-radius-md); background: var(--ncss-color-brand); color: var(--ncss-color-brand-contrast); text-align: center; line-height: 1.05; }
+.site-event-day { font-size: 1.6rem; font-weight: 800; }
+.site-event-month { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+.site-event .ncss-stack { gap: .3rem; }
+.site-event h3, .site-event p { margin: 0; }
+
+/* Formular (YForm, Bootstrap-Markup) mit nativecss-Feldern */
+.site-form form, .site-form > .site-notice { max-width: 40rem; }
+.site-form .form-group { display: grid; gap: .35rem; margin-bottom: var(--ncss-space-md); }
+.site-form label { font-weight: var(--ncss-font-weight-semibold); }
+.site-form input[type="text"], .site-form input[type="email"], .site-form textarea {
+    width: 100%; padding: .65em .8em; border: 1px solid var(--ncss-color-border); border-radius: var(--ncss-radius-md);
+    background: var(--ncss-color-surface); color: var(--ncss-color-text); font: inherit;
+}
+.site-form textarea { min-height: 9rem; }
+.site-form .checkbox label { display: flex; gap: .6em; align-items: flex-start; font-weight: var(--ncss-font-weight-normal); }
+.site-form .has-error input, .site-form .has-error textarea { border-color: var(--ncss-color-danger); }
+.site-form .help-block, .site-form .alert { color: var(--ncss-color-danger); font-size: var(--ncss-font-size-sm); }
+.site-form .alert ul { margin: 0 0 var(--ncss-space-md); padding: var(--ncss-space-sm) var(--ncss-space-md) var(--ncss-space-sm) 2em; border-radius: var(--ncss-radius-md); background: var(--ncss-color-bg-subtle); }
+.site-form button[type="submit"], .site-form input[type="submit"] {
+    padding: .7em 1.3em; border: 0; border-radius: var(--ncss-radius-full); background: var(--ncss-color-brand); color: var(--ncss-color-brand-contrast); font: inherit; font-weight: var(--ncss-font-weight-semibold); cursor: pointer;
+}
+
+/* Fuß */
+.site-footer { margin-top: auto; }
+.site-built code { font-size: .85em; padding: .1em .4em; border-radius: var(--ncss-radius-sm); background: var(--ncss-color-bg-subtle); }
+
+/* Bühne: Text am selben Raster wie die übrigen Abschnitte ausrichten */
+.site-hero .ncss-hero-content { width: 100%; max-width: var(--site-max); margin-inline: auto; padding: var(--ncss-space-2xl) var(--ncss-space-md); }
+
+/* Sprunglink erst bei Tastaturfokus zeigen (ganz aus dem Bild, auch über der festen Kopfzeile) */
+.ncss-skip-link:not(:focus-visible) { inset-block-start: -10rem; }
+
+/* Kopfzeile auf schmalen Bildschirmen einzeilig: Marke, Menü-Knopf, Schalter */
+@media (max-width: 40rem) {
+    .ncss-topbar-inner { flex-wrap: nowrap; gap: var(--ncss-space-xs); }
+    .ncss-topbar-actions { margin-inline-start: auto; gap: var(--ncss-space-2xs); }
+    .site-brand { font-size: .95rem; }
+}

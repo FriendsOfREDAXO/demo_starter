@@ -1,0 +1,38 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+html,body{margin:0;width:1600px;height:1000px;overflow:hidden}
+.s{position:absolute;inset:0}
+</style></head>
+<body>
+<div id="scene" class="s"></div>
+<script>
+// Abstrakte Landschaften: Himmel-Verlauf, Sonne, gestaffelte Hügel (SVG), leichte Körnung
+const P = {
+  dawn:   { sky: ['#ffd6a5', '#fbc4ab', '#a0c4ff'], sun: '#fff1c1', hills: ['#5e6cb3', '#3f4c8f', '#27306b', '#161b47'], sunY: 560 },
+  forest: { sky: ['#d8f3dc', '#b7e4c7', '#95d5b2'], sun: '#fefae0', hills: ['#52b788', '#40916c', '#2d6a4f', '#1b4332'], sunY: 380 },
+  dusk:   { sky: ['#2b2d42', '#8d5a97', '#f4a261'], sun: '#ffd166', hills: ['#6d597a', '#4a3f5c', '#2f2542', '#1a1328'], sunY: 600 },
+  sea:    { sky: ['#e0fbfc', '#c2dfe3', '#9db4c0'], sun: '#ffffff', hills: ['#5c6b73', '#3d5a80', '#293241', '#1b2430'], sunY: 420 },
+  desert: { sky: ['#fefae0', '#faedcd', '#e9c46a'], sun: '#fffdf5', hills: ['#e76f51', '#d4613f', '#a44a3f', '#6b2d2a'], sunY: 470 },
+  night:  { sky: ['#0b132b', '#1c2541', '#3a506b'], sun: '#f1faee', hills: ['#2f4858', '#22394a', '#162a38', '#0b1a24'], sunY: 300 },
+};
+function hill(y, amp, seed, color, w = 1600, h = 1000) {
+  let d = `M0 ${h} L0 ${y}`;
+  for (let x = 0; x <= w; x += 40) {
+    const v = y - amp * (Math.sin((x + seed * 97) / 210) * 0.6 + Math.sin((x + seed * 31) / 83) * 0.25 + Math.sin((x + seed * 13) / 37) * 0.08);
+    d += ` L${x} ${v.toFixed(1)}`;
+  }
+  return `<path d="${d} L${w} ${h} Z" fill="${color}"/>`;
+}
+const name = new URLSearchParams(location.search).get('p') || 'dawn';
+const p = P[name];
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p.sky[0]}"/><stop offset=".55" stop-color="${p.sky[1]}"/><stop offset="1" stop-color="${p.sky[2]}"/></linearGradient>
+<radialGradient id="glow"><stop offset="0" stop-color="${p.sun}" stop-opacity=".9"/><stop offset="1" stop-color="${p.sun}" stop-opacity="0"/></radialGradient>
+<filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .06 0"/></filter></defs>
+<rect width="1600" height="1000" fill="url(#g)"/>
+<circle cx="1080" cy="${p.sunY}" r="260" fill="url(#glow)"/><circle cx="1080" cy="${p.sunY}" r="90" fill="${p.sun}"/>
+${hill(560, 90, 1, p.hills[0])}${hill(650, 110, 2, p.hills[1])}${hill(760, 120, 3, p.hills[2])}${hill(880, 90, 4, p.hills[3])}
+<rect width="1600" height="1000" filter="url(#n)"/></svg>`;
+document.getElementById('scene').innerHTML = svg;
+</script>
+</body></html>

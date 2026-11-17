@@ -1,0 +1,27 @@
+package: demo_starter
+version: '1.0.0-dev'
+author: Friends Of REDAXO
+supportpage: https://github.com/FriendsOfREDAXO/demo_starter
+
+page:
+    title: 'translate:demo_starter_title'
+    perm: admin
+    icon: rex-icon fa-graduation-cap
+    subpages:
+        setup: { title: 'translate:demo_starter_page_setup' }
+        tour: { title: 'translate:demo_starter_page_tour' }
+
+# Nur Pakete, die REDAXO selbst mitbringt. YForm und YRewrite holt die Demo beim Einrichten
+# über den Installer – mit Versionsbedingung statt fester Version (siehe data/content/recipe.yml).
+requires:
+    redaxo: '^5.17'
+    php:
+        version: '>=8.1'
+    packages:
+        structure/content: '>=2.0'
+        install: '>=2.0'
+# Alles Weitere (Medienpool, Media Manager, Metainfo, PHPMailer, YForm, YRewrite) aktiviert „Demo einrichten“ selbst –
+# so lässt sich das AddOn auch in einer frischen Installation aktivieren, in der z. B. PHPMailer noch aus ist.
+
+console_commands:
+    demo_starter:install: FriendsOfRedaxo\DemoStarter\Command\InstallCommand
